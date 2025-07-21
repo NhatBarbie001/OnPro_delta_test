@@ -24,7 +24,7 @@ def get_params():
     parser.add_argument('--dataset', type=str, default='cifar10', help='(default=%(default)s)')
     parser.add_argument('--buffer_size', type=int, default=200, help='(default=%(default)s)')
     parser.add_argument('--buffer_batch_size', type=int, default=64, help='(default=%(default)s)')
-    parser.add_argument('--run_nums', type=int, default=5, help='(default=%(default)s)')
+    parser.add_argument('--run_nums', type=int, default=1, help='(default=%(default)s)')
     parser.add_argument('--batch_size', type=int, default=10, help='(default=%(default)s)')
     parser.add_argument('--proto_t', type=float, default=0.5, help='(default=%(default)s)')
     parser.add_argument('--ins_t', type=float, default=0.07, help='(default=%(default)s)')
