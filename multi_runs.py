@@ -1,4 +1,5 @@
 import datetime
+import random
 
 import numpy as np
 import torch
@@ -15,6 +16,11 @@ def multiple_run(args):
 
     accuracy_list = []
     for run in range(args.run_nums):
+        r_seed = random.randint(0, 1994)
+        np.random.seed(r_seed)
+        random.seed(r_seed)
+        torch.manual_seed(r_seed)
+        
         tmp_acc = []
         print('=' * 100)
         print(f"-----------------------------run {run} start--------------------------")
