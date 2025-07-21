@@ -33,6 +33,8 @@ def get_cifar_data(dataset_name, batch_size, n_workers):
         data_dir = './data/binary_cifar100_10/'
     class_per_task = class_num // task_num
 
+    if dataset_name == "cifar100":
+        random.shuffle(class_distribution_table_cifar100LT)
     if not os.path.isdir(data_dir):
         os.makedirs(data_dir)
         dataset_path = './data/'
@@ -45,8 +47,6 @@ def get_cifar_data(dataset_name, batch_size, n_workers):
             dataset['test'] = datasets.CIFAR10(dataset_path, train=False, download=True, transform=transforms.Compose(
                 [transforms.ToTensor(), transforms.Normalize(mean, std)]))
         elif dataset_name == "cifar100" or dataset_name == "cifar100_50":
-            if dataset_name == "cifar100":
-                random.shuffle(class_distribution_table_cifar100LT)
 
             dataset['train'] = datasets.CIFAR100(dataset_path, train=True, download=True, transform=transforms.Compose(
                 [transforms.ToTensor(), transforms.Normalize(mean, std)]))
