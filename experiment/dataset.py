@@ -34,7 +34,10 @@ def get_cifar_data(dataset_name, batch_size, n_workers):
     class_per_task = class_num // task_num
 
     if dataset_name == "cifar100":
-        random.shuffle(class_distribution_table_cifar100LT)
+        n_shuffle = random.randint(1, 10)
+        for _ in range(n_shuffle):
+            random.shuffle(class_distribution_table_cifar100LT)
+        #print(f"Shuffled class_distribution_table_cifar100LT {n_shuffle} times.")
     if not os.path.isdir(data_dir):
         os.makedirs(data_dir)
         dataset_path = './data/'
