@@ -177,6 +177,14 @@ def resnet18(nclasses: int, nf: int = 64) -> ResNet:
     :return: ResNet network
     """
     return ResNet(BasicBlock, [2, 2, 2, 2], nclasses, nf=64)
+def reduced_resnet18(nclasses: int, nf: int = 20) -> ResNet:
+    """
+    Instantiates a ResNet18 network.
+    :param nclasses: number of output classes
+    :param nf: number of filters
+    :return: ResNet network
+    """
+    return ResNet(BasicBlock, [2, 2, 2, 2], nclasses, nf=20)
 
 
 def init_weights(model, std=0.01):
