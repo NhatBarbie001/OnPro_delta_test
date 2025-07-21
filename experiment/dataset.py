@@ -4,6 +4,7 @@ import torch
 from torchvision import datasets, transforms
 from experiment.tinyimagenet import MyTinyImagenet
 from torch.utils.data import TensorDataset
+import random
 
 
 def get_data(dataset_name, batch_size, n_workers):
@@ -14,7 +15,11 @@ def get_data(dataset_name, batch_size, n_workers):
     else:
         raise Exception('unknown dataset!')
 
-
+class_distribution_table_cifar100LT = [21, 36, 13, 344, 171, 10, 7, 24, 15, 14, 77, 7, 434, 6, 38, 328, 149, 12, 67, 85, 33, 19, 13, 477, 
+                            9, 206, 226, 48, 135, 42, 273, 11, 61, 11, 378, 32, 10, 237, 248, 64, 7, 74, 17, 30, 12, 44, 197, 
+                            314, 118, 40, 89, 6, 260, 18, 5, 5, 5, 455, 25, 23, 70, 179, 98, 9, 163, 102, 8, 188, 5, 500, 8, 
+                            142, 216, 6, 299, 286, 56, 156, 123, 58, 27, 20, 93, 29, 361, 26, 15, 396, 112, 415, 46, 53, 16, 
+                            6, 81, 22, 129, 51, 35, 107]
 def get_cifar_data(dataset_name, batch_size, n_workers):
     data = {}
     size = [3, 32, 32]
@@ -40,6 +45,9 @@ def get_cifar_data(dataset_name, batch_size, n_workers):
             dataset['test'] = datasets.CIFAR10(dataset_path, train=False, download=True, transform=transforms.Compose(
                 [transforms.ToTensor(), transforms.Normalize(mean, std)]))
         elif dataset_name == "cifar100" or dataset_name == "cifar100_50":
+            if dataset_name == "cifar100":
+                random.shuffle(class_distribution_table_cifar100LT)
+
             dataset['train'] = datasets.CIFAR100(dataset_path, train=True, download=True, transform=transforms.Compose(
                 [transforms.ToTensor(), transforms.Normalize(mean, std)]))
             dataset['test'] = datasets.CIFAR100(dataset_path, train=False, download=True, transform=transforms.Compose(
@@ -49,11 +57,23 @@ def get_cifar_data(dataset_name, batch_size, n_workers):
             for data_type in ['train', 'test']:
                 loader = torch.utils.data.DataLoader(dataset[data_type], batch_size=1, shuffle=False)
                 data[task_id][data_type] = {'x': [], 'y': []}
-                for image, target in loader:
-                    label = target.numpy()[0]
-                    if label in range(class_per_task * task_id, class_per_task * (task_id + 1)):
-                        data[task_id][data_type]['x'].append(image)
-                        data[task_id][data_type]['y'].append(label)
+                # Nếu là train và cifar100, lấy theo phân phối LT
+                if dataset_name == "cifar100" and data_type == 'train':
+                    # Đếm số lượng đã lấy cho từng class
+                    class_counts = [0 for _ in range(100)]
+                    for image, target in loader:
+                        label = target.numpy()[0]
+                        if label in range(class_per_task * task_id, class_per_task * (task_id + 1)):
+                            if class_counts[label] < class_distribution_table_cifar100LT[label]:
+                                data[task_id][data_type]['x'].append(image)
+                                data[task_id][data_type]['y'].append(label)
+                                class_counts[label] += 1
+                else:
+                    for image, target in loader:
+                        label = target.numpy()[0]
+                        if label in range(class_per_task * task_id, class_per_task * (task_id + 1)):
+                            data[task_id][data_type]['x'].append(image)
+                            data[task_id][data_type]['y'].append(label)
 
         # save
         for task_id in data.keys():
@@ -86,19 +106,47 @@ def get_cifar_data(dataset_name, batch_size, n_workers):
         dataset_new_test = torch.utils.data.TensorDataset(data[t]['test']['x'], data[t]['test']['y'])
         train_loader = torch.utils.data.DataLoader(
             dataset_new_train,
+            #to test DELTA, we use 16 for train batch size (in parameter: --batch_size 16)
+            #batch_size=16,
             batch_size=batch_size,
             shuffle=True,
             num_workers=n_workers,
         )
         test_loader = torch.utils.data.DataLoader(
             dataset_new_test,
-            batch_size=64,
+            #batch_size=64,
+            #to test DELTA, we use 128 for test batch size
+            batch_size=128,
             shuffle=True,
             num_workers=n_workers,
         )
         Loader[t]['train'] = train_loader
         Loader[t]['test'] = test_loader
+    
 
+    # Print class distribution and total images after everything is set up
+    if dataset_name == "cifar100":
+        train_class_counts = [0 for _ in range(class_num)]
+        test_class_counts = [0 for _ in range(class_num)]
+        for t in range(task_num):
+            y_train = data[t]['train']['y']
+            y_test = data[t]['test']['y']
+            if hasattr(y_train, 'numpy'):
+                y_train = y_train.numpy()
+            if hasattr(y_test, 'numpy'):
+                y_test = y_test.numpy()
+            for c in range(class_num):
+                train_class_counts[c] += int((y_train == c).sum())
+                test_class_counts[c] += int((y_test == c).sum())
+    
+        print("Train distribution: ")
+        print(class_distribution_table_cifar100LT)
+        print("Train class distribution:")
+        print(train_class_counts)
+        print(f"Total train images: {sum(train_class_counts)}")
+        print("Test class distribution:")
+        print(test_class_counts)
+        print(f"Total test images: {sum(test_class_counts)}")
     print("Data and loader is prepared")
     return data, class_num, class_per_task, Loader, size
 
