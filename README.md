@@ -20,7 +20,7 @@ python main.py --buffer_size 200 --mixup_p 0.6 --mixup_base_rate 0.75 --gpu_id 0
 
 **CIFAR-100**
 ```
-python main.py --dataset cifar100 --buffer_size 500 --mixup_p 0.2 --mixup_base_rate 0.9 --gpu_id 0
+python main.py --dataset cifar100 --buffer_size 500 --batch_size 16 --mixup_p 0.2 --mixup_base_rate 0.9 --gpu_id 0
 ```
 
 **TinyImageNet**
