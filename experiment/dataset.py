@@ -33,10 +33,10 @@ def get_cifar_data(dataset_name, batch_size, n_workers):
         data_dir = './data/binary_cifar100_10/'
     class_per_task = class_num // task_num
 
-    if dataset_name == "cifar100":
-        n_shuffle = random.randint(1, 10)
-        for _ in range(n_shuffle):
-            random.shuffle(class_distribution_table_cifar100LT)
+    # if dataset_name == "cifar100":
+    #     n_shuffle = random.randint(1, 10)
+    #     for _ in range(n_shuffle):
+    #         random.shuffle(class_distribution_table_cifar100LT)
         #print(f"Shuffled class_distribution_table_cifar100LT {n_shuffle} times.")
     if not os.path.isdir(data_dir):
         os.makedirs(data_dir)
@@ -117,9 +117,9 @@ def get_cifar_data(dataset_name, batch_size, n_workers):
         )
         test_loader = torch.utils.data.DataLoader(
             dataset_new_test,
-            #batch_size=64,
+            batch_size=64,
             #to test DELTA, we use 128 for test batch size
-            batch_size=128,
+            #batch_size=128,
             shuffle=True,
             num_workers=n_workers,
         )

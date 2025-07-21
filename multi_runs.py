@@ -24,7 +24,7 @@ def multiple_run(args):
         args.n_classes = class_num
         buffer = Buffer(args, input_size).cuda()
 
-        model = reduced_resnet18(class_num).cuda()
+        model = resnet18(class_num).cuda()
         optimizer = Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.99), weight_decay=1e-4)
         agent = TrainLearner(model, buffer, optimizer, class_num, class_per_task, input_size, args)
 
