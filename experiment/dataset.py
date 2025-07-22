@@ -28,7 +28,7 @@ def get_cifar_data(dataset_name, batch_size, n_workers):
         class_num = 10
         data_dir = './data/binary_cifar_/'
     elif dataset_name == "cifar100":
-        task_num = 10
+        task_num = 20
         class_num = 100
         data_dir = './data/binary_cifar100_10/'
     class_per_task = class_num // task_num
